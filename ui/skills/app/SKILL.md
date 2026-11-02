@@ -119,5 +119,5 @@ npx vitest run docs/stories/<Domain>
 ```
 
 All story tests for the feature pass without editing them. If a test seems wrong, stop
-and ask — the test is the spec; change the `.md` + test first (`/front:story`,
-`/front:test`) only with the user's agreement. Then run lint and type-check.
+and ask — the test is the spec; change the `.md` + test first (`/ui:story`,
+`/ui:test`) only with the user's agreement. Then run lint and type-check.

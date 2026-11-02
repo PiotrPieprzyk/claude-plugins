@@ -8,8 +8,8 @@ description: Write a UI story spec (docs/stories/<Domain>/<story-slug>.md) descr
 A UI story is a short Markdown file that pins down **what a user sees and can do** on one
 screen or component: the elements (as a `data-testid` tree), their copy, their states
 (default, loading, disabled, error, empty), what happens on interaction, and where the
-user ends up. It is the source of truth for the story test (`/front:test`) and the
-component (`/front:app`). It never mentions component names' internals, hooks, state
+user ends up. It is the source of truth for the story test (`/ui:test`) and the
+component (`/ui:app`). It never mentions component names' internals, hooks, state
 variables or CSS classes.
 
 ## 1. Where it goes: grouped by domain
@@ -18,8 +18,8 @@ variables or CSS classes.
 <package>/docs/stories/
   <Domain>/                 # business area: Cart, Checkout, Catalog, Menu, Room, Game
     <story-slug>.md         # this skill
-    <story-slug>.test.ts    # /front:test
-    shared/                 # mocks, builders, render, get/ (see /front:test)
+    <story-slug>.test.ts    # /ui:test
+    shared/                 # mocks, builders, render, get/ (see /ui:test)
   testUtils.ts              # design tokens shared by all domains
 docs/design/                # design source (mockups, exported HTML, prompt), if any
 ```
@@ -57,7 +57,7 @@ docs/design/                # design source (mockups, exported HTML, prompt), if
 
 ## 4. Template
 
-Copy exactly; keep heading levels — `/front:test` relies on them.
+Copy exactly; keep heading levels — `/ui:test` relies on them.
 
 ````markdown
 ## <Actor> can <do something>.
@@ -163,5 +163,5 @@ Rules:
 
 - Check every rule in Description has a WHEN and every WHEN's assertion targets an
   element in the tree.
-- Tell the user the path; offer `/front:test` for the test and `/front:app` for the
+- Tell the user the path; offer `/ui:test` for the test and `/ui:app` for the
   component.

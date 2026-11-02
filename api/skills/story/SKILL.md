@@ -8,7 +8,7 @@ description: Write an API story spec (docs/stories/<Domain>/<story-slug>.md) des
 A story is a short Markdown file that pins down **what an API does, as seen by a client**:
 which requests succeed, which get rejected and with what status, what state changes are
 visible afterwards, and which events get broadcast. It is the source of truth for the
-matching `.test.ts` (written with `/back:test`) and for the implementation. It never
+matching `.test.ts` (written with `/api:test`) and for the implementation. It never
 mentions classes, tables, repositories or other internals.
 
 ## 1. Where it goes: grouped by domain
@@ -17,8 +17,8 @@ mentions classes, tables, repositories or other internals.
 <package>/docs/stories/
   <Domain>/                     # e.g. Cart, Checkout, Payment, Catalog, Room, Game
     <story-slug>.md             # this skill
-    <story-slug>.test.ts        # /back:test
-    shared/                     # per-domain test helpers (see /back:test)
+    <story-slug>.test.ts        # /api:test
+    shared/                     # per-domain test helpers (see /api:test)
   testUtils/                    # cross-domain test helpers (HTTP client, event helpers)
 ```
 
@@ -59,7 +59,7 @@ Read, in this order, and stop as soon as you have enough:
 
 ## 4. Template
 
-Copy exactly; keep heading levels — `/back:test` relies on them.
+Copy exactly; keep heading levels — `/api:test` relies on them.
 
 ````markdown
 ## <Actor> can <do something>.
@@ -164,4 +164,4 @@ Rules:
 
 - Re-read the WHEN list against the Description: every rule has at least one case; no
   case tests something the Description doesn't state.
-- Tell the user the file path and offer to write the test with `/back:test`.
+- Tell the user the file path and offer to write the test with `/api:test`.

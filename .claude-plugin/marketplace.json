@@ -4,14 +4,14 @@
   "description": "Personal Claude Code plugins and skills of Piotr Pieprzyk.",
   "plugins": [
     {
-      "name": "back",
-      "source": "./back",
-      "description": "API story specs (/back:story) and black-box API story tests (/back:test), grouped by domain under docs/stories."
+      "name": "api",
+      "source": "./api",
+      "description": "API story specs (/api:story) and black-box API story tests (/api:test), grouped by domain under docs/stories."
     },
     {
-      "name": "front",
-      "source": "./front",
-      "description": "UI story specs (/front:story), UI story integration tests (/front:test) and app component structure (/front:app), grouped by domain under docs/stories."
+      "name": "ui",
+      "source": "./ui",
+      "description": "UI story specs (/ui:story), UI story integration tests (/ui:test) and app component structure (/ui:app), grouped by domain under docs/stories."
     }
   ]
 }

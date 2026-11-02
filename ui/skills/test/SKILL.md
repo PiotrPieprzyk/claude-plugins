@@ -21,7 +21,7 @@ See `examples.md` in this skill folder for full examples of every shared file.
 <package>/docs/stories/
   testUtils.ts                       # design tokens (DESIGN_COLORS, DESIGN_FONTS) for all domains
   <Domain>/
-    <story-slug>.md                  # spec (/front:story)
+    <story-slug>.md                  # spec (/ui:story)
     <story-slug>.test.ts             # this skill
     shared/
       mocks.ts                       # createMock<Dependency>(overrides) per injected dependency
@@ -158,7 +158,7 @@ or internal state, mocking child components or the project's own hooks/modules.
 - **Next.js App Router**: async Server Components can't be rendered by Testing Library.
   Test the client component that receives their data (render it with built props and
   mocked client-side dependencies), and keep server-side data fetching covered by API
-  stories (`/back:test`) or a few end-to-end tests. Mock `next/navigation`'s
+  stories (`/api:test`) or a few end-to-end tests. Mock `next/navigation`'s
   `useRouter`/`usePathname` through `createMockRouter` + `vi.mock('next/navigation')`
   in `render.ts` only (framework boundary), or better, inject a router interface via
   context if the app has one.

@@ -26,7 +26,7 @@ supertest, Next.js route handlers, running server) and event helpers.
     events.ts
     fakes/                      # in-memory replacements for external systems (payment, CMS, email, DB)
   <Domain>/
-    <story-slug>.md             # the spec (/back:story)
+    <story-slug>.md             # the spec (/api:story)
     <story-slug>.test.ts        # this skill
     shared/                     # per-domain helpers, once a 2nd story in the domain needs them
       setup.ts                  # e.g. createCustomer(), createRoomWithPlayers(n)
