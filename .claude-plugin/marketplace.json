@@ -12,6 +12,11 @@
       "name": "ui",
       "source": "./ui",
       "description": "UI story specs (/ui:story), UI story integration tests (/ui:test) and app component structure (/ui:app), grouped by domain under docs/stories."
+    },
+    {
+      "name": "design",
+      "source": "./design",
+      "description": "Design handoff packages (/design:handoff): HANDOFF.md tokens, STRUCTURE.md/BEHAVIOUR.md and .dc.html mockups per width, ready for Claude Code."
     }
   ]
 }
