@@ -1,0 +1,6 @@
+{
+  "name": "back",
+  "version": "0.1.0",
+  "author": { "name": "Piotr Pieprzyk" },
+  "description": "API story specs and black-box API story tests, grouped by domain under docs/stories."
+}

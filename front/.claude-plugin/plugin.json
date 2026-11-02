@@ -1,0 +1,6 @@
+{
+  "name": "front",
+  "version": "0.1.0",
+  "author": { "name": "Piotr Pieprzyk" },
+  "description": "UI story specs, UI story integration tests and app component structure, grouped by domain under docs/stories."
+}

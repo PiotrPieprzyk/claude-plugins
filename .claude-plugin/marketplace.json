@@ -1,0 +1,17 @@
+{
+  "name": "piotr-plugins",
+  "owner": { "name": "Piotr Pieprzyk" },
+  "description": "Personal Claude Code plugins and skills of Piotr Pieprzyk.",
+  "plugins": [
+    {
+      "name": "back",
+      "source": "./back",
+      "description": "API story specs (/back:story) and black-box API story tests (/back:test), grouped by domain under docs/stories."
+    },
+    {
+      "name": "front",
+      "source": "./front",
+      "description": "UI story specs (/front:story), UI story integration tests (/front:test) and app component structure (/front:app), grouped by domain under docs/stories."
+    }
+  ]
+}
