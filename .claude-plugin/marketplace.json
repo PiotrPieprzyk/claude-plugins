@@ -16,7 +16,7 @@
     {
       "name": "design",
       "source": "./design",
-      "description": "Design handoff packages (/design:handoff): HANDOFF.md tokens, STRUCTURE.md/BEHAVIOUR.md and .dc.html mockups per width, ready for Claude Code."
+      "description": "Design handoff packages (/design:handoff): HANDOFF.md tokens, DESCRIPTION.md and .dc.html mockups per width, ready for Claude Code."
     }
   ]
 }

@@ -6,7 +6,7 @@ Personal [Claude Code](https://claude.com/claude-code) plugin marketplace.
 |---|---|---|
 | `api` | `/api:story`, `/api:test` | API story specs and black-box API story tests, grouped by domain under `docs/stories/` |
 | `ui` | `/ui:story`, `/ui:test`, `/ui:app` | UI story specs, UI story integration tests and story-driven component structure |
-| `design` | `/design:handoff` | Design handoff folder (tokens, structure/behaviour, `.dc.html` mockups) for Claude Code to build from |
+| `design` | `/design:handoff` | Design handoff folder (common tokens in HANDOFF.md, a DESCRIPTION.md and `.dc.html` mockups per deliverable) for Claude Code to build from |
 
 ## Install
 

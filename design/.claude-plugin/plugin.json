@@ -2,5 +2,5 @@
   "name": "design",
   "version": "0.1.0",
   "author": { "name": "Piotr Pieprzyk" },
-  "description": "Design handoff packages (/design:handoff): tokens, structure, behaviour and .dc.html mockups that Claude Code can build from."
+  "description": "Design handoff packages (/design:handoff): common tokens in HANDOFF.md, plus a DESCRIPTION.md and .dc.html mockups per deliverable that Claude Code can build from."
 }
