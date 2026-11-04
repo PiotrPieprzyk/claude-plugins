@@ -6,7 +6,7 @@
     {
       "name": "api",
       "source": "./api",
-      "description": "API story specs (/api:story) and black-box API story tests (/api:test), grouped by domain under docs/stories."
+      "description": "API story specs (/api:story), black-box API story tests (/api:test), grouped by domain under docs/stories, and the backend code style that implements them (/api:dev)."
     },
     {
       "name": "ui",

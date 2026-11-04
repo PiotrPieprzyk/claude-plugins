@@ -2,5 +2,5 @@
   "name": "api",
   "version": "0.1.0",
   "author": { "name": "Piotr Pieprzyk" },
-  "description": "API story specs and black-box API story tests, grouped by domain under docs/stories."
+  "description": "API story specs and black-box API story tests, grouped by domain under docs/stories, and the backend code style (entities, value objects, repositories, persistence mappers) that implements them."
 }
