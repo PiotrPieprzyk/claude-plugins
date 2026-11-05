@@ -50,6 +50,12 @@ docs/design/                # design source (mockups, exported HTML, prompt), if
 2. The design source under `docs/design/` (or the screenshots/mockup the user gives):
    exact labels, button copy, error messages, states and their colors.
 3. The matching API story or API contract — what the UI calls and what errors it can get.
+   For a server-rendered page, the API story of the same slug specifies the page's data
+   (which items, order, numbers, failures as values) and the shared props type is the
+   contract. This story starts from those props and specifies only how each value looks:
+   copy, formatting, labels, links, empty/error/not-found screens. Don't repeat the data
+   rules (e.g. "only products with a price are listed"); state as a prerequisite what the
+   page receives ("the page gets products A and B, B with free 2 of 3").
 4. If the screen already exists (documenting before a refactor): run or read it to
    capture current copy and behavior; describe behavior, not code.
 5. Ask the user about anything the design doesn't settle (copy for an error, where to

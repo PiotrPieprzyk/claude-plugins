@@ -105,11 +105,31 @@ Split out a new file when a component takes a second responsibility, even if sho
 
 ## 6. Framework notes
 
-- **Next.js App Router**: keep server components thin — fetch data and pass plain props
-  to a client feature component that owns interaction and is what the story renders.
-  Interfaces (API client, router) reach client components via a providers component in
-  the root layout. `next/navigation` is wrapped behind the router interface, not used
-  directly in feature components.
+- **Next.js App Router**: the server component (`page.tsx`) is composition only. It
+  calls the backend module's page loader and spreads the result into the client feature
+  component, which owns interaction and is what the story renders:
+
+  ```tsx
+  export default async function ProductRoute({ params }) {
+    const page = await loadProductPage((await params).slug);
+    if (!page) notFound();
+    return <ProductPage {...page} />;
+  }
+  ```
+
+  - Type the client component's props with the shared contract type the loader returns
+    (`ProductPageProps` from e.g. `src/kernel/contracts.ts`), not a local `Props` type, so
+    a mismatch is a compile error.
+  - No `try`/`catch`, mapping, fallbacks or data `if`s in `page.tsx`: neither the UI
+    stories (they render the client component) nor the API stories (they call the loader)
+    reach it. Data rules go in the loader (`/api:dev`); the client component handles every
+    state the props can carry (`{status: "error"}`, a streamed promise resolving to
+    `{ok: false}`, an empty list).
+  - Streamed data arrives as a promise prop, read with `use()`/Suspense in the client
+    component.
+  - Interfaces (API client, router) reach client components via a providers component in
+    the root layout. `next/navigation` is wrapped behind the router interface, not used
+    directly in feature components.
 - Respect the project's lint import rules (layer boundaries, alias-only imports).
 
 ## 7. Done when

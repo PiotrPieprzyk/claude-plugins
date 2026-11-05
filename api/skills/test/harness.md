@@ -104,8 +104,23 @@ export function createClient() {
 }
 ```
 
-Limits of calling handlers directly — switch to C (or `next-test-api-route-handler`)
-for the stories that hit them:
+Prefer running each request through `next-test-api-route-handler` (NTARH) inside
+`send()` instead of calling the handler: it uses Next's own route module, so
+`cookies()`, `headers()`, `after()` and `nextUrl` behave as in production. Keep the route
+table, cookie jar and response parsing as above; pass `rejectOnHandlerError: true` so a
+thrown handler fails the test instead of turning into a 500.
+
+```ts
+let res!: Response;
+await testApiHandler({
+    appHandler: mod, params: route.params, url: `http://test.local${path}`,
+    rejectOnHandlerError: true,
+    test: async ({fetch}) => { res = await fetch({method, headers, body}); },
+});
+```
+
+Limits of calling handlers directly (fewer with NTARH) — switch to C for the stories
+that hit them:
 
 - Handlers using `cookies()`/`headers()` from `next/headers`, `after()`,
   `revalidateTag()`/`revalidatePath()` need Next's request context and throw here.
@@ -115,6 +130,38 @@ for the stories that hit them:
 - Middleware/`proxy.ts`, rewrites, redirects and headers from `next.config` don't run.
 - `server-only` throws outside an RSC build: alias it to an empty module in the test
   config.
+
+### Server-rendered pages (B's companion) — call the page loader
+
+Async Server Components can't be rendered in a unit-test runner, and they shouldn't hold
+logic anyway: the module's page loader builds the client component's props (`/api:dev`,
+"Page loaders"). Story tests open a page by calling its loader. As with routes, one file
+knows where the loaders live:
+
+```ts
+// docs/stories/testUtils/pages.ts
+import type {ProductPageProps, ShopPageProps} from '@kernel/contracts';
+
+const catalog = () => import('@server/modules/catalog/index.server');
+
+export async function openShopPage(query: {category?: string | string[]} = {}): Promise<ShopPageProps> {
+    return (await catalog()).loadShopPage(query);
+}
+
+/** null: the page is the not-found page. */
+export async function openProductPage(slug: string): Promise<ProductPageProps | null> {
+    return (await catalog()).loadProductPage(slug);
+}
+```
+
+```ts
+const page = await shop.openProductPage('trzecie-oko');
+expect(page?.content).toEqual({status: 'ok', product: {id: 'A', price: 17900, /* … */}});
+expect(await page?.stock).toEqual({ok: true, byId: {A: {free: 1, /* … */}}});
+```
+
+The loaders run against the same fakes as the routes, so setup reuses the API (a
+checkout holds a piece; the page then shows it reserved).
 
 ## C. Any framework — a running server
 

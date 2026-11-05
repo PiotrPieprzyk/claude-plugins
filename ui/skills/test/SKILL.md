@@ -156,9 +156,18 @@ or internal state, mocking child components or the project's own hooks/modules.
 ## 8. Framework notes
 
 - **Next.js App Router**: async Server Components can't be rendered by Testing Library.
-  Test the client component that receives their data (render it with built props and
-  mocked client-side dependencies), and keep server-side data fetching covered by API
-  stories (`/api:test`) or a few end-to-end tests. Mock `next/navigation`'s
+  Test the client component that receives their data: render it with props built from the
+  shared contract type (`ShopPageProps`), and mocked client-side dependencies. The split:
+  - the UI story tests what each possible prop value **looks like**: formatted prices,
+    labels, links, empty/error/not-found screens, a pending, resolved or `{ok: false}`
+    streamed promise (pass a promise you resolve in the test);
+  - the API story (`/api:test`) tests which props the server **gives**, through the page
+    loader;
+  - `page.tsx` only wires the two, so it needs no test. If it holds logic, that's a code
+    problem (`/ui:app`, `/api:dev`), not a missing test.
+
+  Builders produce every state of the contract type, including the failure values, so a
+  state the server can send is never missing on the UI side. Mock `next/navigation`'s
   `useRouter`/`usePathname` through `createMockRouter` + `vi.mock('next/navigation')`
   in `render.ts` only (framework boundary), or better, inject a router interface via
   context if the app has one.

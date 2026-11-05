@@ -1,6 +1,6 @@
 ---
 name: test
-description: Write a black-box API story test (docs/stories/<Domain>/<story-slug>.test.ts) from its story spec .md — one test per WHEN heading, driving the API only through HTTP/events and faking external services at the boundary. Use when the user asks for backend/API story tests, wants tests for an endpoint, webhook or realtime event, or wants behavior-level safety tests before refactoring backend code.
+description: Write a black-box API story test (docs/stories/<Domain>/<story-slug>.test.ts) from its story spec .md — one test per WHEN heading, driving the API only through HTTP/events (and page loaders, in full-stack apps) and faking external services at the boundary. Use when the user asks for backend/API story tests, wants tests for an endpoint, webhook, realtime event or the data of a server-rendered page, wants behavior-level safety tests before refactoring backend code, or asks to review story tests for behavior and coverage.
 ---
 
 # Writing API story tests
@@ -10,6 +10,11 @@ client does — HTTP requests and event subscriptions — and assert on what a c
 observe: status, response body, and state visible through other requests or events.
 They must survive any refactor that keeps the behavior, so they never import or mock
 the project's internal modules.
+
+The one other entry point, in full-stack frameworks, is a **page loader**: the server
+function that builds a page's props (see `/api:dev`, "Page loaders"). Story tests call it
+like a route and assert the props, as data. How those props look on screen is tested by
+the UI stories (`/ui:test`), never here.
 
 It is expected and correct for a test to fail until the behavior exists. Do not weaken
 assertions to make it pass — the test is the spec.
@@ -23,6 +28,7 @@ supertest, Next.js route handlers, running server) and event helpers.
 <package>/docs/stories/
   testUtils/                    # cross-domain: HTTP client, event helpers, fakes of external services
     http.ts
+    pages.ts                    # full-stack only: openXxxPage() → the page loader's props
     events.ts
     fakes/                      # in-memory replacements for external systems (payment, CMS, email, DB)
   <Domain>/
@@ -111,6 +117,20 @@ Assert, in this order:
    (`waitForEvent(client, 'roomEdited')`) and check type + key `dto` fields. For "SHOULD
    NOT receive", await with a short timeout and expect it to reject.
 
+For a page loader, the props take the place of status and body: assert the data
+(`content`, IDs, prices in minor units, the resolved value of a streamed promise), and
+`null`/not-found where the story says so. Never assert formatted text or labels.
+
+- **Several values in one WHEN** (a validation rule with 4 bad inputs): loop, and give
+  every `expect` a label naming the value (`expect(res.status, label).toBe(400)`), so the
+  failure says which one broke.
+- **Concurrency**: assert the allowed outcomes exactly (`[200, 409]` sorted numerically,
+  `(a, b) => a - b`), not "any non-200 is fine, retry". A test that tolerates every
+  outcome can't fail.
+- **Copy**: assert only text the `.md` gives (subjects, error messages). Wording the spec
+  doesn't fix ("PAID BUT OUT OF STOCK") makes the test fail on harmless rewording; add it
+  to the `.md` first or assert the business fact (`/refund 1 piece/i`).
+
 Avoid: asserting on internal function calls, `vi.mock` of project modules, spying on
 repositories, checking log output, snapshot tests.
 
@@ -135,6 +155,29 @@ repositories, checking log output, snapshot tests.
 - Recorded external payloads (webhook bodies, provider responses) go in
   `<Domain>/shared/fixtures/` as JSON and are sent as real request bodies, with real
   signatures computed by a test helper using a test secret.
+- **A fake holds data, not rules.** If the real system applies a rule for the app (a CMS
+  query that filters out unpublished or unpriced products, a DB query that sorts), a fake
+  that re-implements it makes the story test check the fake. Either the fake returns
+  everything and the rule moves into app code, or the story says "the query decides it"
+  with no WHEN for it, and an adapter test covers the query (`/api:dev`, Tests).
+- **Faking at a port** (an in-memory repository) skips the real adapter. Concurrency and
+  conditional-write stories then prove the in-memory store's semantics, not the
+  database's. Keep the in-memory store honest with one contract suite that runs against
+  both it and a local real instance (DynamoDB Local, Postgres in Docker).
+- Failure switches on fakes (`failEveryRequest()`, `conflictOnEveryWrite()`) are how
+  stories reach the 500/502/503 paths; prefer them to holding internal locks. When a race
+  needs a gate (`holdNextCommit`), keep its matching logic inside the fake, since it knows
+  the storage shape and the test shouldn't.
+
+### Behavior the framework owns
+
+Some promises are kept by the framework, not by the app: a cached page served fresh after
+a tag expires, a soft 404's `noindex` meta, a redirect's status. An in-process test can't
+observe them, and pretending to (a "fresh content" test that passes because nothing is
+cached in tests) proves nothing. Test the app's side instead (which cache tags the webhook
+expires, recorded by a stub of `revalidateTag`; that a not-found page gets no data), and
+let the `.md` name what checks the rest (an adapter unit test that reads are tagged, a
+post-deploy check).
 
 ## 7. Isolation and cleanup
 
@@ -165,4 +208,28 @@ npx vitest run docs/stories/<Domain>/<story-slug>.test.ts
 - Behavior already implemented (safety net before a refactor): all tests must pass
   before the refactor starts. If one fails, the code and the `.md` disagree — report it
   to the user and ask which one is right; don't silently change either.
+- **A new test that passes at once must still be able to fail.** Break the behavior on
+  purpose (a limit 3 → 4, drop a fallback, let a promise reject), check the matching
+  tests fail, then restore the code exactly and rerun.
 - Update the story's `### Status:` only when the user asks or the implementation is done.
+
+## 10. Reviewing story tests
+
+When asked whether the stories test behavior and cover the use cases, check:
+
+1. **Every `Done` story has a `.test.ts`.** A Done story without one is the biggest gap.
+   If its entry point can't be reached (a page, not a route), that's a testability
+   problem to fix in the code (`/api:dev`, page loaders), not a reason to skip it.
+2. **Every `####` heading has an `it` with the same text**, and every `it` has a heading.
+   Tests that belong to another story move to it.
+3. **Every rule in the Description has a WHEN**: limits, normalization (trimmed,
+   lowercased, uppercased), fallbacks, ordering, every error status, every "rejected
+   requests change nothing", accepted boundary values as well as rejected ones.
+4. **The WHEN asserts what its title promises**: the fields it names, the "and nothing
+   changed" part, the setup the prerequisites describe (images, slugs).
+5. **Nothing tests a fake** (section 6), and nothing tests the framework (above).
+6. **Assertions can fail**: concurrency outcomes exact, no tolerated retries, no copy the
+   spec doesn't fix.
+
+Report gaps by story, most serious first (money, stock and security before validation
+details), with the missing WHEN written out so it can go straight into the `.md`.

@@ -275,6 +275,42 @@ export class OrderPersistenceMap {
   use `.value`.
 - Dependencies (repositories, gateways, `now`, `log`) are injected, typed by interfaces.
 
+### Page loaders (full-stack frameworks: Next.js App Router, Remix, SvelteKit…)
+
+A server-rendered page is an entry point like a route handler, so its logic belongs in the
+module, not in the page file. For each page, the module exports one **page loader** that
+returns exactly the props of the client component that renders the page:
+
+```ts
+// src/server/modules/catalog/application/pages.ts, wired in the module's index.server.ts
+loadShopPage(query): Promise<ShopPageProps>
+loadProductPage(slug): Promise<ProductPageProps | null> // null = not found
+```
+
+- The props type lives in the shared contracts file, next to the HTTP request/response
+  types (e.g. `src/kernel/contracts.ts`), and the client component types its props with
+  it. The loader and the component then can't drift apart without a compile error.
+- The loader does everything between the module's use cases and the screen: mapping to
+  plain props (prices in minor units, IDs, `null` for "missing"), limits (at most 3
+  images), fallbacks (a missing title), and **turning expected failures into values**
+  (`{status: "error"}`; a streamed promise resolves to `{ok: false}` instead of
+  rejecting). No display formatting (`"179,00 zł"`, labels, copy): that's the UI's job.
+- The page file is composition only, a few lines, with nothing worth testing:
+
+  ```tsx
+  export default async function ProductRoute({ params }) {
+    const page = await loadProductPage((await params).slug);
+    if (!page) notFound();
+    return <ProductPage {...page} />;
+  }
+  ```
+
+  A `try`/`catch`, a `.map`, a fallback or an `if` on data in a page file is logic the
+  tests can't reach: move it into the loader. Only framework calls (`connection()`,
+  `notFound()`, `redirect()`) stay in the page.
+- Use cases that only the pages used stop being exported from the module; the loaders
+  are the pages' entry points.
+
 ## 9. Errors
 
 - Domain and value objects throw the project's domain error classes (`InvariantError`,
@@ -300,8 +336,13 @@ wrap as soon as a second place checks or computes with the value.
   primitives. Cover cross-field rules and that operations return new instances.
 - Store/mapper tests: compare entities with `toEqual(Entity.create(raw))`, and stored data
   with the raw/persistence object.
-- Story tests (`/api:test`) don't change: they see only HTTP/events and the stored plain
-  data, which the mapper keeps the same.
+- Story tests (`/api:test`) don't change: they see only HTTP/events, page loader props and
+  the stored plain data, which the mapper keeps the same.
+- Keep rules out of places the story tests can't reach or replace with a fake: page files
+  (→ page loaders, section 8) and queries sent to an external system. A filter in a
+  GROQ/SQL query is invisible to a story test whose fake answers that query. When a rule
+  has to live in a query, cover it with an adapter test against the real system (local
+  instance) or a recorded response, and say in the story that the query decides it.
 
 ## 12. Refactoring existing code to this style
 

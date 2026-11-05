@@ -149,6 +149,35 @@ Rules:
 - Things outside the system (payment provider, CMS, email service, clock) are described
   as what they send or return: "Payment provider sends a COMPLETED notification",
   "CMS returns product P with price 100". The test fakes them at the boundary.
+- Write a WHEN only for a rule the app itself applies. A rule an external system applies
+  for us (the CMS query only returns published products) goes in the Description as "the
+  query decides it", with no WHEN, since its test would only check the fake.
+- For behavior the framework owns (a cached page served fresh, a soft 404's `noindex`),
+  write the app's side as the WHEN ("SHOULD expire product:A") and name what checks the
+  rest in the Description (an adapter test, a post-deploy check).
+
+### Stories for server-rendered pages
+
+In a full-stack app a page has two stories with the **same slug**: this API story for the
+page's data, and a UI story (`/ui:story`) for how it looks. Split the rules, never repeat
+them:
+
+| API story (page data) | UI story (screen) |
+|---|---|
+| which items, in which order, which fields | formatted prices, labels, copy |
+| prices in minor units, `null` for missing | the link, placeholder or "nothing" for `null` |
+| limits (at most 3 images), fallbacks | layout, states, interaction |
+| failures as values: `{status: "error"}`, `{ok: false}` | the error and not-found screens |
+| not found → no page data | navigation |
+
+- WHENs are in data terms: `SHOULD give B quantity 3, free 2, reserved 1`, not `SHOULD
+  show "2 left"`; `SHOULD give content status "error"`, not `SHOULD show "Content
+  unavailable"`.
+- The page is opened, not requested: "WHEN a customer opens /product/x SHOULD give …".
+- **Required API** names the page and its loader (``Page `/product/{slug}` (the props of
+  ProductPage, built by `loadProductPage`)``) and the props type from the shared
+  contracts file. Setup and verification routes are listed as usual.
+- Link the UI story of the same slug in the Description.
 
 ## 6. Required API section
 
@@ -162,6 +191,9 @@ Rules:
 
 ## 7. Finish
 
-- Re-read the WHEN list against the Description: every rule has at least one case; no
-  case tests something the Description doesn't state.
+- Re-read the WHEN list against the Description: every rule has at least one case
+  (including normalization such as trimming or lowercasing, accepted boundary values,
+  and each "nothing changed"); no case tests something the Description doesn't state.
+- A story is `Done` only with a passing `.test.ts`. If its entry point can't be tested
+  yet, say so and propose the seam (`/api:dev`) rather than marking it Done untested.
 - Tell the user the file path and offer to write the test with `/api:test`.
